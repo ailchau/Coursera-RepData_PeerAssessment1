@@ -24,6 +24,7 @@ if(!exists("activity")) {
 ```{r}
 activity <- read.csv("activity.csv", na.strings="NA")
 activity$date <- as.Date(as.character(activity$date), format="%Y-%m-%d")
+head(activity)
 ```
 
 ## What is mean total number of steps taken per day?
@@ -32,12 +33,15 @@ activity$date <- as.Date(as.character(activity$date), format="%Y-%m-%d")
 (note: missing values were omitted from calculation)
 ```{r}
 total.steps <- activity %>% group_by(date) %>% summarize(total = sum(steps, na.rm=TRUE))
+head(total.steps)
 ```
 
 #### Make a histogram of the total number of steps taken each day
 ```{r hist_steps, warning=FALSE}
 hist.steps <- ggplot(total.steps, aes(total))
-hist.steps + geom_histogram(stat="bin", fill="steelblue", bins=25) + ggtitle("Frequency of the Total Number of Steps Taken Each Day") + labs(x="Total Steps", y="Count")
+hist.steps + geom_histogram(stat="bin", fill="steelblue", bins=25) + 
+  ggtitle("Frequency of the Total Number of Steps Taken Each Day") + 
+  labs(x="Total Steps", y="Count")
 ```
 
 #### Calculate the mean and median total number of steps taken per day
@@ -52,12 +56,15 @@ The mean and median total number of steps taken per day is `r mn` and `r med` re
 #### Make a time series plot of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis)
 ```{r plot_interval, warning=FALSE}
 time.series <- ggplot(activity, aes(interval, steps))
-time.series + stat_summary(fun.y="mean", geom="line", color="steelblue", lwd=0.75) + ggtitle("Average Number of Steps Taken Across All Days") + labs(x="5-Minute Interval", y="Mean Steps")
+time.series + stat_summary(fun.y="mean", geom="line", color="steelblue", lwd=0.75) + 
+  ggtitle("Average Number of Steps Taken Across All Days") + 
+  labs(x="5-Minute Interval", y="Mean Steps")
 ```
 
 #### Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
 ```{r}
-mean.ordered <- activity %>% group_by(interval) %>% summarize(mean = mean(steps, na.rm=TRUE)) %>% arrange(desc(mean))
+mean.ordered <- activity %>% group_by(interval) %>% summarize(mean = mean(steps, na.rm=TRUE)) %>% 
+  arrange(desc(mean))
 maximum <- mean.ordered$interval[1]
 ```
 The `r maximum` minute interval contains the maximum number of steps, averaged across all days.
@@ -79,7 +86,9 @@ Assuming that this individual has a regular schedule and does similar activities
 ```{r}
 mean.interval <- aggregate(steps~interval, data=activity, mean)
 activity.complete <- activity
-activity.complete$steps <- ifelse(is.na(activity.complete$steps), mean.interval$steps[mean.interval$interval %in% activity.complete$steps], activity.complete$steps)
+activity.complete$steps <- ifelse(is.na(activity.complete$steps), 
+                                  mean.interval$steps[mean.interval$interval %in% activity.complete$steps], 
+                                  activity.complete$steps)
 ```
 
 
@@ -87,7 +96,10 @@ activity.complete$steps <- ifelse(is.na(activity.complete$steps), mean.interval$
 ```{r hist_steps_impute}
 total.steps.complete <- activity.complete %>% group_by(date) %>% summarize(total=sum(steps, na.rm=TRUE))
 hist.steps.complete <- ggplot(total.steps.complete, aes(total))
-hist.steps.complete + geom_histogram(stat="bin", fill="steelblue", bins=25) + ggtitle("Frequency of the Total Number of Steps Taken Each Day") + labs(x="Total Steps", y="Count")
+hist.steps.complete + 
+  geom_histogram(stat="bin", fill="steelblue", bins=25) + 
+  ggtitle("Frequency of the Total Number of Steps Taken Each Day") + 
+  labs(x="Total Steps", y="Count")
 ```
 
 #### Calculate the mean and median total number of steps taken per day
@@ -105,12 +117,16 @@ The mean and median total number of steps taken per day is `r mn.complete` and `
 #### Create a new factor variable in the dataset with two levels -- "weekday" and "weekend" 
 (note: the imputed dataset was used)
 ```{r}
-activity.complete$day <- ifelse(weekdays(activity.complete$date)=="Saturday"| weekdays(activity.complete$date)=="Sunday", "Weekends", "Weekdays")
+activity.complete$day <- ifelse(weekdays(activity.complete$date)=="Saturday"| 
+                                  weekdays(activity.complete$date)=="Sunday", "Weekends", "Weekdays")
 ```
 
 #### Make a panel plot containing a time series plot of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis).
 ```{r plot_interval_days}
 wk.series <- ggplot(activity.complete, aes(interval, steps))
-wk.series + stat_summary(fun.y="mean", geom="line", color="steelblue", lwd=0.75) + facet_grid(day ~.) + ggtitle("Average Number of Steps Taken Across Weekdays and Weekends") + labs(x="Interval", y="Mean Steps")
+wk.series + stat_summary(fun.y="mean", geom="line", color="steelblue", lwd=0.75) + 
+  facet_grid(day ~.) + 
+  ggtitle("Average Number of Steps Taken Across Weekdays and Weekends") + 
+  labs(x="Interval", y="Mean Steps")
 ```
 
